@@ -4,21 +4,20 @@ using System.Text;
 
 namespace LibreriaDeClases
 {
-    public class Token
+    public class Symbol
     {
-
-        public Token()
+        public Symbol()
         {
-            ListaSimbolos = new List<Symbol>();
+            esOperador = false;
         }
 
-        public List<Symbol> ListaSimbolos
+        public string Simbolo
         {
             get;
             set;
         }
 
-        public int num
+        public bool esOperador
         {
             get;
             set;

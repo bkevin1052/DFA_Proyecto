@@ -47,7 +47,7 @@
             this.btnCargarArchivo.Name = "btnCargarArchivo";
             this.btnCargarArchivo.Size = new System.Drawing.Size(75, 46);
             this.btnCargarArchivo.TabIndex = 1;
-            this.btnCargarArchivo.Text = "Cargar archivo";
+            this.btnCargarArchivo.Text = "Cargar Archivo";
             this.btnCargarArchivo.UseVisualStyleBackColor = true;
             this.btnCargarArchivo.Click += new System.EventHandler(this.btnCargarArchivo_Click);
             // 

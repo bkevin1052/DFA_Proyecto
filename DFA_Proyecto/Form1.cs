@@ -19,7 +19,8 @@ namespace DFA_Proyecto
         OpenFileDialog open;
         StreamReader lecturaArchivo;
         string abecedarioMayus = "ABCDEFGHIJKLMNOPQRSTUVWXYZ", abecedarioMinus = "abcdefghijklmnopqrstuvwxyz", digitos = "0123456789", espacio = "_";
-        string linea;        
+        string linea;  
+       
         
         //SETS
         string inicioMayus = string.Empty, finMayus = string.Empty, temp = string.Empty, inicioMin = string.Empty,
@@ -32,6 +33,7 @@ namespace DFA_Proyecto
         //TOKENS
         Stack<Token> pilaTokens;
         Token nuevoToken;
+        Symbol simboloToken;
 
         //ACTIONS
         Dictionary<int, LibreriaDeClases.Action> actions;
@@ -43,6 +45,8 @@ namespace DFA_Proyecto
         Error ErrorTemp;
         Dictionary<string, Error> error;
 
+        //AUTOMATA
+        Automata automata;
 
         public Form1()
         {
@@ -249,10 +253,10 @@ namespace DFA_Proyecto
         private void LecturaTokens()
         {
             try
-            {
-                string[] ArregloLinea;
+            {                
                 char[] charLinea;
-                while ((linea = lecturaArchivo.ReadLine()) != null)
+                linea = lecturaArchivo.ReadLine();
+                while (linea != null && linea.ToUpper() != "ACTIONS")
                 {
                     linea = linea.TrimEnd().TrimStart();
                     if (linea.ToUpper() == "ACTIONS")
@@ -263,53 +267,110 @@ namespace DFA_Proyecto
                     {
                         if (linea.Contains("="))
                         {
-                            ArregloLinea = linea.Split('=');
-                            linea = ArregloLinea[1].TrimEnd().TrimStart();
+                            charLinea = linea.ToCharArray();
+                            linea = linea.Remove(0, RetornarIgual(charLinea) + 1);
+                            int num = RetornarNum(charLinea);
+                            linea = linea.TrimEnd().TrimStart();
+                            charLinea = linea.ToCharArray();
 
-                            if (linea.Contains("\'"))
+                            int contadorComillas = 0;
+                            string simbolo = "";
+                            nuevoToken = new Token();
+                            nuevoToken.num = num;
+
+                            foreach (char c in charLinea)
                             {
-                                charLinea = linea.ToCharArray();
-                                for (int i = 0; i < linea.Length; i++)
+                                if (c == '\'')
                                 {
-                                    if (charLinea[i].Equals('\'') && !charLinea[i+1].Equals('\''))
+                                    if(contadorComillas == 0)
                                     {
-                                        charLinea[i] = '_';
-                                        charLinea[i+2] = '_';
-                                        i = i + 2;
+                                        contadorComillas++;
                                     }
-                                    else if (charLinea[i].Equals('\'') && charLinea[i+1].Equals('\'') && charLinea[i+2].Equals('\''))
+                                    else
                                     {
-                                        charLinea[i] = '_';
-                                        charLinea[i + 2] = '_';
-                                        i = i + 2;
+                                        simboloToken = new Symbol();
+                                        simboloToken.Simbolo = simbolo;
+                                        nuevoToken.ListaSimbolos.Add(simboloToken);
+                                        contadorComillas = 0;
+                                        simbolo = "";
+                                    }
+                                }else if (c == '*' || c == '|' || c == '(' || c == ')' || c == '+' || c == '?' )
+                                {
+                                    if (contadorComillas == 1)
+                                    {
+                                        simbolo += c;
+                                    }
+                                    else
+                                    {
+                                        simboloToken = new Symbol();
+                                        simboloToken.Simbolo = c.ToString();
+                                        simboloToken.esOperador = true;
+                                        nuevoToken.ListaSimbolos.Add(simboloToken);
+                                    }
+                                }else if (c == ' ')
+                                {
+                                    if (contadorComillas == 1)
+                                    {
+                                        simbolo += c;
+                                    }
+                                    else if(simbolo.Length > 0)
+                                    {
+                                        simboloToken = new Symbol();
+                                        simboloToken.Simbolo = simbolo;
+                                        nuevoToken.ListaSimbolos.Add(simboloToken);
+                                        simbolo = "";
                                     }
                                 }
-
-                                linea = "";
-                                for (int i = 0; i < charLinea.Length; i++)
+                                else
                                 {
-                                    linea += charLinea[i].ToString();
+                                    simbolo += c;
                                 }
-                                linea = Regex.Replace(linea,"_", "");
-                                nuevoToken = new Token();
-                                nuevoToken.Valor = linea;
-                                pilaTokens.Push(nuevoToken);
                             }
-                            else
-                            {
-                                nuevoToken = new Token();
-                                nuevoToken.Valor = linea;
-                                pilaTokens.Push(nuevoToken);
-                            }
+                            pilaTokens.Push(nuevoToken);
                         }
                     }
+                    linea = lecturaArchivo.ReadLine();
                 }
+                LecturaActions();
             }
-            catch
+            catch(Exception e)
             {
-                MessageBox.Show(linea, "ERROR", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show( e + linea, "ERROR", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
+        }
+
+        /// <summary>
+        /// Metodo para retornar un entero donde se encuentra el signo =
+        /// </summary>
+        /// <param name="linea"></param>
+        /// <returns></returns>
+        private int RetornarNum(char[] linea)
+        {
+            for (int i = 0; i < linea.Length; i++)
+            {                
+                if (char.IsNumber(linea[i]) && char.IsNumber(linea[i+1]))
+                {
+                    return Convert.ToInt16(linea[i].ToString() + linea[i+1].ToString());
+                }
+                else if (char.IsDigit(linea[i]))
+                {
+                    return Convert.ToInt16(linea[i].ToString());
+                }
+            }
+            return 0;
+        }
+
+        private int RetornarIgual(char[] linea)
+        {
+            for (int i = 0; i < linea.Length; i++)
+            {
+                if (linea[i].Equals('='))
+                {
+                    return i;
+                }
+            }
+            return 0;
         }
 
         /// <summary>
@@ -319,13 +380,12 @@ namespace DFA_Proyecto
         {
             try
             {
-                while ((linea = lecturaArchivo.ReadLine()) != null)
+                while ((linea = lecturaArchivo.ReadLine()) != null && !linea.ToUpper().Contains("ERROR"))
                 {
                     linea = linea.TrimEnd().TrimStart();
                     if (linea.ToUpper().Contains("ERROR"))
                     {
-                        LecturaError();
-                        CrearAutomata();                        
+                        LecturaError();                      
                     }
 
                     if (linea.Trim().TrimEnd().TrimStart() == "RESERVADAS()")
@@ -348,6 +408,8 @@ namespace DFA_Proyecto
                         actions.Add(int.Parse(action[0].Substring(0, 2)), ActionTemp);
                     }
                 }
+                LecturaError();
+                CrearAutomata();
             }
             catch
             {
@@ -381,7 +443,8 @@ namespace DFA_Proyecto
         /// </summary>
         private void CrearAutomata()
         {
-
+            automata = new Automata(pilaTokens);
+            automata.Concatenar();            
         }
     }
 }
