@@ -4,7 +4,8 @@ using System.Text;
 
 namespace LibreriaDeClases
 {
-    public class Estado
+    public class NodoHoja
     {
+        
     }
 }

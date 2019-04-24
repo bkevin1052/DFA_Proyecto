@@ -264,11 +264,33 @@ namespace DFA_Proyecto
                         if (linea.Contains("="))
                         {
                             ArregloLinea = linea.Split('=');
-                            linea = ArregloLinea[2].TrimEnd().TrimStart();
+                            linea = ArregloLinea[1].TrimEnd().TrimStart();
 
                             if (linea.Contains("\'"))
                             {
+                                charLinea = linea.ToCharArray();
+                                for (int i = 0; i < linea.Length; i++)
+                                {
+                                    if (charLinea[i].Equals('\'') && !charLinea[i+1].Equals('\''))
+                                    {
+                                        charLinea[i] = '_';
+                                        charLinea[i+2] = '_';
+                                        i = i + 2;
+                                    }
+                                    else if (charLinea[i].Equals('\'') && charLinea[i+1].Equals('\'') && charLinea[i+2].Equals('\''))
+                                    {
+                                        charLinea[i] = '_';
+                                        charLinea[i + 2] = '_';
+                                        i = i + 2;
+                                    }
+                                }
 
+                                linea = "";
+                                for (int i = 0; i < charLinea.Length; i++)
+                                {
+                                    linea += charLinea[i].ToString();
+                                }
+                                linea = Regex.Replace(linea,"_", "");
                                 nuevoToken = new Token();
                                 nuevoToken.Valor = linea;
                                 pilaTokens.Push(nuevoToken);
@@ -303,6 +325,7 @@ namespace DFA_Proyecto
                     if (linea.ToUpper().Contains("ERROR"))
                     {
                         LecturaError();
+                        CrearAutomata();                        
                     }
 
                     if (linea.Trim().TrimEnd().TrimStart() == "RESERVADAS()")
@@ -351,6 +374,14 @@ namespace DFA_Proyecto
                 MessageBox.Show(linea, "ERROR", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
+        }
+
+        /// <summary>
+        /// Metodo para generar un automata
+        /// </summary>
+        private void CrearAutomata()
+        {
+
         }
     }
 }
