@@ -4,18 +4,14 @@ using System.Text;
 
 namespace LibreriaDeClases
 {
-    public class Token
+    public class Set
     {
 
-        public Token()
+        public Set()
         {
 
         }
 
-        public string Valor
-        {
-            get;
-            set;
-        }
+        public List<char> set = new List<char>();
     }
 }

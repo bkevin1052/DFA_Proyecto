@@ -4,15 +4,14 @@ using System.Text;
 
 namespace LibreriaDeClases
 {
-    public class Token
+    public class Error
     {
-
-        public Token()
+        public Error()
         {
 
         }
 
-        public string Valor
+        public int Valor
         {
             get;
             set;

@@ -15,36 +15,43 @@ namespace DFA_Proyecto
 {
     public partial class Form1 : Form
     {
+        //VARIABLES GLOBALES
         OpenFileDialog open;
         StreamReader lecturaArchivo;
         string abecedarioMayus = "ABCDEFGHIJKLMNOPQRSTUVWXYZ", abecedarioMinus = "abcdefghijklmnopqrstuvwxyz", digitos = "0123456789", espacio = "_";
-        string linea;
-
+        string linea;        
         
-        //VARIABLES GLOBALES
+        //SETS
         string inicioMayus = string.Empty, finMayus = string.Empty, temp = string.Empty, inicioMin = string.Empty,
         finMin = string.Empty, inicioEs = string.Empty, finEs = string.Empty, inicioChar = string.Empty, finChar = string.Empty;
+        Dictionary<string, Set> sets;
+        Set SetTemp;
 
-        bool setsLeido = false, tokensLeido = false,actionsLeido = false,errorLeido = false;
-        //SETS
-        string CHARSET = string.Empty, DIGITO, LETRA = string.Empty;
+        bool setsLeido = false;
 
         //TOKENS
         Stack<Token> pilaTokens;
         Token nuevoToken;
 
         //ACTIONS
-        Dictionary<int, string> ListaActions;
-        int llaves = 0;
-        string[] expresionSimple;
+        Dictionary<int, LibreriaDeClases.Action> actions;
+        LibreriaDeClases.Action ActionTemp;
+        int llaves;
+        string[] action;
 
         //ERROR
-        private string errores;
+        Error ErrorTemp;
+        Dictionary<string, Error> error;
+
 
         public Form1()
         {
             InitializeComponent();
             open = new OpenFileDialog();
+            sets = new Dictionary<string,Set>();
+            pilaTokens = new Stack<Token>();
+            actions = new Dictionary<int, LibreriaDeClases.Action>();
+            error = new Dictionary<string, Error>();
         }
 
         private void btnCargarArchivo_Click(object sender, EventArgs e)
@@ -55,55 +62,42 @@ namespace DFA_Proyecto
             {
                 txtRuta.Text = open.FileName;
                 lecturaArchivo = new StreamReader(open.FileName);
-                setsLeido = false;
 
-                //LECTURA SETS
-                linea = lecturaArchivo.ReadLine();
-                linea = linea.TrimEnd().TrimStart();
+                //Inicio de lectura
                 LecturaSets();
-
-                //LECTURA TOKENS
-                pilaTokens = new Stack<Token>();
-                linea = lecturaArchivo.ReadLine();
-                linea = linea.TrimEnd().TrimStart();
-                LecturaTokens();
-
-                //LECTURA ACTIONS
-                linea = lecturaArchivo.ReadLine();
-                linea = linea.TrimEnd().TrimStart();
-                ListaActions = new Dictionary<int, string>();
-                LecturaActions();
-
-                //LECTURA ERROR
-                LecturaError();
             }
-        }           
+        }
 
+        /// <summary>
+        /// LECTURA SETS
+        /// </summary>
         private void LecturaSets()
         {
-            int x, y;            
-
-            if (linea == "SETS" && setsLeido != true)
+            try
             {
-                setsLeido = true;
-                LecturaSets();
-            }
-            else
-            {
-                for (int j  = 0; j < 3; j++)
+                int x, y;
+                while ((linea = lecturaArchivo.ReadLine()) != null)
                 {
-                    linea = lecturaArchivo.ReadLine();
                     linea = linea.TrimEnd().TrimStart();
-                    if (j == 0)
+                    if (linea.ToUpper() == "TOKENS")
                     {
-                        if (linea.Contains("LETRA"))
+                        LecturaTokens();
+                    }
+                    if (linea.ToUpper() == "SETS" || setsLeido != true)
+                    {
+                        setsLeido = true;
+                    }
+                    else
+                    {
+                        //LECTURA DEL DICCIONARIO LETRA
+                        if (linea.ToUpper().Contains("LETRA"))
                         {
                             if (linea.Contains("="))
                             {
                                 linea = linea.TrimEnd().TrimStart();
                                 for (int i = 0; i < abecedarioMayus.Length; i++)
                                 {
-                                    if (linea.TrimEnd().Contains(("'" + abecedarioMayus.ToCharArray()[i] + "'").ToString()))
+                                    if (linea.TrimEnd(' ').Contains(("'" + abecedarioMayus.ToCharArray()[i] + "'").ToString()))
                                     {
                                         inicioMayus = temp;
                                         temp = abecedarioMayus.ToCharArray()[i].ToString();
@@ -116,7 +110,7 @@ namespace DFA_Proyecto
 
                                 for (int i = 0; i < abecedarioMinus.Length; i++)
                                 {
-                                    if (linea.TrimEnd().Contains(("'" + abecedarioMinus.ToCharArray()[i] + "'").ToString()))
+                                    if (linea.TrimEnd(' ').Contains(("'" + abecedarioMinus.ToCharArray()[i] + "'").ToString()))
                                     {
                                         inicioMin = temp;
                                         temp = abecedarioMinus.ToCharArray()[i].ToString();
@@ -129,7 +123,7 @@ namespace DFA_Proyecto
 
                                 for (int i = 0; i < espacio.Length; i++)
                                 {
-                                    if (linea.TrimEnd().Contains(("'" + espacio.ToCharArray()[i] + "'").ToString()))
+                                    if (linea.TrimEnd(' ').Contains(("'" + espacio.ToCharArray()[i] + "'").ToString()))
                                     {
                                         inicioEs = temp;
                                         temp = espacio.ToCharArray()[i].ToString();
@@ -140,13 +134,14 @@ namespace DFA_Proyecto
                                     }
                                 }
 
+                                //Creando set LETRA
+                                SetTemp = new Set();
 
                                 if (inicioMayus != "" && finMayus != "")
                                 {
                                     x = abecedarioMayus.IndexOf(inicioMayus);
                                     y = abecedarioMayus.LastIndexOf(finMayus);
-
-                                    LETRA = abecedarioMayus.Substring(x, y - x + 1);
+                                    SetTemp.set.AddRange(abecedarioMayus.Substring(x, y - x + 1).ToList());
                                 }
 
 
@@ -154,31 +149,21 @@ namespace DFA_Proyecto
                                 {
                                     x = abecedarioMinus.IndexOf(inicioMin);
                                     y = abecedarioMinus.LastIndexOf(finMin);
-                                    LETRA = LETRA + abecedarioMinus.Substring(x, y - x + 1);
+                                    SetTemp.set.AddRange(abecedarioMinus.Substring(x, y - x + 1).ToList());
                                 }
 
                                 if (inicioEs != "" && finEs != "")
                                 {
                                     x = espacio.IndexOf(inicioEs);
                                     y = espacio.IndexOf(finEs);
-                                    LETRA = LETRA + finEs;
+                                    SetTemp.set.Add(Convert.ToChar(finEs));
                                 }
-                            }
-                            else
-                            {
-                                MessageBox.Show("No se encontro un signo  =  en LETRA en la columna de SETS \n" + linea, "ERROR", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                                break;
+
+                                sets.Add("LETRA", SetTemp);
                             }
                         }
-                        else
-                        {
-                            MessageBox.Show(linea, "ERROR", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                            break;
-                        }
-                    }
-                    else if (j == 1)
-                    {
-                        if (linea.Contains("DIGITO"))
+                        //LECTURA DEL DICCIONARIO DE DIGITO
+                        else if (linea.Contains("DIGITO"))
                         {
                             if (linea.Contains("="))
                             {
@@ -196,30 +181,22 @@ namespace DFA_Proyecto
                                     }
                                 }
 
+                                //Creando set de Digitos
+                                SetTemp = new Set();
+
                                 if (inicioMayus != "" && finMayus != "")
                                 {
                                     x = digitos.IndexOf(inicioMayus);
                                     y = digitos.LastIndexOf(finMayus);
-                                    DIGITO = digitos.Substring(x, y - x + 1);
+                                    SetTemp.set.AddRange(digitos.Substring(x, y - x + 1).ToList());
                                 }
 
-                            }
-                            else
-                            {
-                                MessageBox.Show("No se encontro un signo  =  en LETRA en la columna de SETS \n" + linea, "ERROR", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                                break;
-                            }
-                        }
-                        else
-                        {
-                            MessageBox.Show(linea, "ERROR", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                            break;
+                                sets.Add("DIGITO", SetTemp);
 
+                            }
                         }
-                    }
-                    else if (j == 2)
-                    {
-                        if (linea.Contains("CHARSET"))
+                        //LECTURA DEL DICCIONARIO CHARSET
+                        else if (linea.Contains("CHARSET"))
                         {
                             int contador = 0;
                             linea = linea.TrimEnd().TrimStart();
@@ -242,114 +219,90 @@ namespace DFA_Proyecto
                                                 }
                                             }
                                         }
+                                        SetTemp = new Set();
+
                                         if (contador == 2)
                                         {
                                             for (int i = int.Parse(inicioChar); i < int.Parse(finChar); i++)
                                             {
-                                                CHARSET = CHARSET + (char)i;
+                                                SetTemp.set.Add((char)i);
                                             }
-                                        }
-                                        else
-                                        {
-                                            MessageBox.Show("No se encontro un rango en CHARSET", "ERROR",  MessageBoxButtons.OK, MessageBoxIcon.Error);
-                                            contador = 0;
-                                            break;
+                                            sets.Add("CHARSET", SetTemp);
                                         }
                                     }
                                 }
                             }
-                            else
-                            {
-                                MessageBox.Show("No se encontro un signo = en CHARSET", "ERROR",   MessageBoxButtons.OK, MessageBoxIcon.Error);
-                                break;
-                            }
-                        }
-                        else
-                        {
-                            MessageBox.Show(linea, "ERROR", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                            break;
                         }
                     }
                 }
             }
+            catch
+            {
+                MessageBox.Show(linea, "ERROR", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
         }
 
+        /// <summary>
+        /// LECTURA TOKENS
+        /// </summary>
         private void LecturaTokens()
         {
-            
-            if (linea == "TOKENS" && tokensLeido != true)
+            try
             {
-                tokensLeido = true;
-                LecturaTokens();
-            }
-            else
-            {
-                while((linea = lecturaArchivo.ReadLine()) != null)
+                string[] ArregloLinea;
+                char[] charLinea;
+                while ((linea = lecturaArchivo.ReadLine()) != null)
                 {
-                    linea = linea.TrimEnd().TrimStart().ToUpper();
-                    string[] expresionSimple;
-                    if (linea == "ACTIONS")
+                    linea = linea.TrimEnd().TrimStart();
+                    if (linea.ToUpper() == "ACTIONS")
                     {
-                        return;
+                        LecturaActions();
                     }
-
-                    if (linea.Contains("TOKEN"))
+                    if (linea.ToUpper().Contains("TOKEN"))
                     {
                         if (linea.Contains("="))
                         {
-                            expresionSimple = linea.Split('=');
-                            expresionSimple[1] = expresionSimple[1].TrimStart().TrimEnd();
+                            ArregloLinea = linea.Split('=');
+                            linea = ArregloLinea[2].TrimEnd().TrimStart();
 
-                            if (linea.Contains('\''))
-                            {                              
+                            if (linea.Contains("\'"))
+                            {
+
                                 nuevoToken = new Token();
-                                nuevoToken.valor = expresionSimple[1];
+                                nuevoToken.Valor = linea;
                                 pilaTokens.Push(nuevoToken);
                             }
                             else
                             {
                                 nuevoToken = new Token();
-                                nuevoToken.valor = expresionSimple[1];
+                                nuevoToken.Valor = linea;
                                 pilaTokens.Push(nuevoToken);
                             }
                         }
-                        else
-                        {
-                            MessageBox.Show("ERROR", "No se encontro un signo  =  en TOKEN en la columna de TOKENS\n" + linea, MessageBoxButtons.OK, MessageBoxIcon.Error);
-                            break;
-                        }
-                    }
-                    else if(linea.Equals(""))
-                    {
-                        continue;
-                    }
-                    else
-                    {
-                        MessageBox.Show(linea, "ERROR", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                        break;
                     }
                 }
             }
-
-
+            catch
+            {
+                MessageBox.Show(linea, "ERROR", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
         }
 
+        /// <summary>
+        /// LECTURA ACTIONS
+        /// </summary>
         private void LecturaActions()
         {
-            if (linea == "ACTIONS" && actionsLeido != true)
+            try
             {
-                actionsLeido = true;
-                LecturaActions();
-            }
-            else
-            {
-                while((linea = lecturaArchivo.ReadLine()) != null)
+                while ((linea = lecturaArchivo.ReadLine()) != null)
                 {
-                    
                     linea = linea.TrimEnd().TrimStart();
-                    if(linea.Contains("error") || linea.Contains("ERROR"))
+                    if (linea.ToUpper().Contains("ERROR"))
                     {
-                        return;
+                        LecturaError();
                     }
 
                     if (linea.Trim().TrimEnd().TrimStart() == "RESERVADAS()")
@@ -366,54 +319,37 @@ namespace DFA_Proyecto
                     }
                     else if (linea.Contains("\'"))
                     {
-                        expresionSimple = linea.TrimEnd().TrimStart().Split('\'');
-                        try
-                        {
-                            ListaActions.Add(int.Parse(expresionSimple[0].Substring(0, 2)), expresionSimple[1]);
-                        }
-                        catch
-                        {
-                            MessageBox.Show("No se pudo completar la lectura debido a siguiente error " + linea, "ERROR", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
-                        }
-                    }
-                    else
-                    {
-                        if (linea == "ACTIONS")
-                        {
-                            actionsLeido = true;
-                            continue;
-                        }
-                        else
-                        {
-                            continue;
-                        }
+                        action = linea.TrimEnd().TrimStart().Split('\'');
+                        ActionTemp = new LibreriaDeClases.Action();
+                        ActionTemp.Valor = action[1];
+                        actions.Add(int.Parse(action[0].Substring(0, 2)), ActionTemp);
                     }
                 }
+            }
+            catch
+            {
+                MessageBox.Show(linea, "ERROR", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
             }
         }
 
+        /// <summary>
+        /// LECTURA ERROR
+        /// </summary>
         private void LecturaError()
         {
-            if (linea.Contains("ERROR") || linea.Contains("error") || errorLeido == true)
+            try
             {
-                linea = linea.Trim().TrimEnd().TrimStart();
-                string[] expresion = linea.Split(' ');
-            
-                if (linea.Contains("="))
-                {
-                    errorLeido = true;
-                    errores = expresion[2];
-                }
-                else
-                {
-                    MessageBox.Show("Error no contiene = " + linea, "ERROR", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
-                }
+                string[] ArregloLinea;
+                ArregloLinea = linea.Split('=');
+                ErrorTemp = new Error();
+                ErrorTemp.Valor = int.Parse(ArregloLinea[1]);
+                error.Add("ERROR", ErrorTemp);
             }
-            
-
-            if (errorLeido == false)
+            catch
             {
-                MessageBox.Show("Error no contiene ERROR", "ERROR", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                MessageBox.Show(linea, "ERROR", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
             }
         }
     }

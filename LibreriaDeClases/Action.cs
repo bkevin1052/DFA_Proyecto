@@ -4,10 +4,9 @@ using System.Text;
 
 namespace LibreriaDeClases
 {
-    public class Token
+    public class Action
     {
-
-        public Token()
+        public Action()
         {
 
         }
