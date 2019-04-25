@@ -53,7 +53,6 @@ namespace LibreriaDeClases
             int n = Symbol.Count;
             for (int i = 0; i < n; ++i)
             {
-
                 Symbol c = new Symbol();
                 c = Symbol[i];
 
@@ -168,6 +167,10 @@ namespace LibreriaDeClases
                 ListaSimbolos.Add(simbolo);
             }
             ListaSimbolos.Remove(ListaSimbolos[ListaSimbolos.Count - 1]);
+            simbolo = new Symbol();
+            simbolo.Simbolo = ")";
+            simbolo.esOperador = true;
+            ListaSimbolos.Add(simbolo);
             simbolo = new Symbol();
             simbolo.Simbolo = ".";
             simbolo.esOperador = true;
