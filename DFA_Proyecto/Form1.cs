@@ -294,7 +294,7 @@ namespace DFA_Proyecto
                                         contadorComillas = 0;
                                         simbolo = "";
                                     }
-                                }else if (c == '*' || c == '|' || c == '(' || c == ')' || c == '+' || c == '?' )
+                                }else if (c == '*' || c == '|' || c == '(' || c == ')' || c == '?' )
                                 {
                                     if (contadorComillas == 1)
                                     {
@@ -444,7 +444,9 @@ namespace DFA_Proyecto
         private void CrearAutomata()
         {
             automata = new Automata(pilaTokens);
-            automata.Concatenar();            
+            automata.Concatenar();
+            Nodo raiz = automata.Raiz();
+            List<Symbol> l = automata.Lista();
         }
     }
 }

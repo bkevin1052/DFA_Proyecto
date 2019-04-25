@@ -6,6 +6,14 @@ namespace LibreriaDeClases
 {
     public class Nodo
     {
+
+        public Nodo()
+        {
+            First = new List<int>();
+            Last = new List<int>();
+            Nullable = false;
+        }
+
         public Nodo Izquierdo
         {
             get;
@@ -13,6 +21,30 @@ namespace LibreriaDeClases
         }
 
         public Nodo Derecho
+        {
+            get;
+            set;
+        }
+
+        public Symbol Simbolo
+        {
+            get;
+            set;
+        }
+
+        public List<int> First
+        {
+            get;
+            set;
+        }
+
+        public List<int> Last
+        {
+            get;
+            set;
+        }
+
+        public bool Nullable
         {
             get;
             set;

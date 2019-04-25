@@ -12,6 +12,8 @@ namespace LibreriaDeClases
         private List<Symbol> ListaSimbolos;
         private Symbol simbolo;
         private Token tokenTemp;
+        private Nodo nodoTemp;
+        private Nodo raiz;
 
         public Automata(Stack<Token> pilaTokens)
         {
@@ -20,11 +22,40 @@ namespace LibreriaDeClases
             
         }
 
-        public List<Symbol> NotacionPolaca(List<Symbol> ListaSymbol)
+        public Nodo NotacionPolaca(List<Symbol> ListaSymbol)
         {
-            List<Symbol> resultado = new List<Symbol>();
+            Stack<Nodo> pila = new Stack<Nodo>();
+            
+            for (int i = 0; i <= ListaSimbolos.Count; i++)
+            {
+                if (!ListaSimbolos[i].esOperador)
+                {
+                    nodoTemp = new Nodo();
+                    nodoTemp.Simbolo = ListaSimbolos[i];
+                    pila.Push(nodoTemp);
+                }
+                else if (ListaSimbolos[i].Simbolo == "|" || ListaSimbolos[i].Simbolo == ".")
+                {
+                   nodoTemp = new Nodo();
+                   nodoTemp.Simbolo = ListaSimbolos[i];
+                   Nodo nodoTemp1 = pila.Pop();
+                   Nodo nodoTemp2 = pila.Pop();
+                   nodoTemp.Izquierdo = nodoTemp2;
+                   nodoTemp.Derecho = nodoTemp1;
+                   pila.Push(nodoTemp);                    
 
-            return null;
+                }
+                else if (ListaSimbolos[i].Simbolo == "*" || ListaSimbolos[i].Simbolo == "+" || ListaSimbolos[i].Simbolo == "?")
+                {
+                    nodoTemp = new Nodo();
+                    nodoTemp.Simbolo = ListaSimbolos[i];
+                    Nodo nodoTemp1 = pila.Pop();
+                    nodoTemp.Izquierdo = nodoTemp1;
+                    pila.Push(nodoTemp);
+                }
+            }
+
+            return pila.Pop();
         }
 
         public int Operador(string Symbol)
@@ -36,8 +67,6 @@ namespace LibreriaDeClases
                 case ".":
                     return 2;
                 case "*":
-                    return 3;
-                case "+":
                     return 3;
                 case "?":
                     return 3;
@@ -179,6 +208,18 @@ namespace LibreriaDeClases
             simbolo.Simbolo = "#";
             ListaSimbolos.Add(simbolo);
             ListaSimbolos = InfijoPosfijo(ListaSimbolos);
+            raiz = NotacionPolaca(ListaSimbolos);
+
+        }
+
+        public Nodo Raiz()
+        {
+            return raiz;
+        }
+
+        public List<Symbol> Lista()
+        {
+            return ListaSimbolos;
         }
     }
 }
