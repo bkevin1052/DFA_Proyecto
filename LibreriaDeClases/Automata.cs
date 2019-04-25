@@ -26,7 +26,7 @@ namespace LibreriaDeClases
         {
             Stack<Nodo> pila = new Stack<Nodo>();
             
-            for (int i = 0; i <= ListaSimbolos.Count; i++)
+            for (int i = 0; i < ListaSimbolos.Count; i++)
             {
                 if (!ListaSimbolos[i].esOperador)
                 {
@@ -155,6 +155,10 @@ namespace LibreriaDeClases
                         {
                             ListaSimbolos.Add(symbol);
                             contador = 0;
+                            if (symbol.Simbolo == "'" && !symbol.esOperador)
+                            {
+                                contador = 1;
+                            }
                         }
                         else if(contador == 1)
                         {
@@ -162,8 +166,7 @@ namespace LibreriaDeClases
                             punto.Simbolo = ".";
                             punto.esOperador = true;
                             ListaSimbolos.Add(punto);
-                            ListaSimbolos.Add(symbol);
-                            
+                            ListaSimbolos.Add(symbol);                            
                         }
                     }
                     else

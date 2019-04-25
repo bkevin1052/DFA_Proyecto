@@ -289,6 +289,10 @@ namespace DFA_Proyecto
                                     else
                                     {
                                         simboloToken = new Symbol();
+                                        if (simbolo == "")
+                                        {
+                                            simbolo = "\'";
+                                        }
                                         simboloToken.Simbolo = simbolo;
                                         nuevoToken.ListaSimbolos.Add(simboloToken);
                                         contadorComillas = 0;
@@ -411,9 +415,9 @@ namespace DFA_Proyecto
                 LecturaError();
                 CrearAutomata();
             }
-            catch
+            catch(Exception e)
             {
-                MessageBox.Show(linea, "ERROR", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(linea + " " + e, "ERROR", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
         }
@@ -446,7 +450,6 @@ namespace DFA_Proyecto
             automata = new Automata(pilaTokens);
             automata.Concatenar();
             Nodo raiz = automata.Raiz();
-            List<Symbol> l = automata.Lista();
         }
     }
 }
