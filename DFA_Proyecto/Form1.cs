@@ -450,6 +450,14 @@ namespace DFA_Proyecto
             automata = new Automata(pilaTokens);
             automata.Concatenar();
             Nodo raiz = automata.Raiz();
+            automata.EnumerarHojas(raiz);
+            raiz = automata.Raiz();
+            automata.AgregarNullable(raiz);
+            raiz = automata.Raiz();
+            automata.AgregarFirst(raiz);
+            raiz = automata.Raiz();
+            automata.AgregarLast(raiz);
+            raiz = automata.Raiz();
         }
     }
 }

@@ -8,18 +8,18 @@ namespace LibreriaDeClases
     {
 
         private Stack<Token> pilaTokens;
-        private Queue<Token> colaTokens;
         private List<Symbol> ListaSimbolos;
         private Symbol simbolo;
         private Token tokenTemp;
         private Nodo nodoTemp;
         private Nodo raiz;
+        
+        //Enumera el nodo
+        private int NumeroNodo = 0;
 
         public Automata(Stack<Token> pilaTokens)
         {
-            this.pilaTokens = pilaTokens;
-            colaTokens = new Queue<Token>();
-            
+            this.pilaTokens = pilaTokens;            
         }
 
         public Nodo NotacionPolaca(List<Symbol> ListaSymbol)
@@ -42,6 +42,7 @@ namespace LibreriaDeClases
                    Nodo nodoTemp2 = pila.Pop();
                    nodoTemp.Izquierdo = nodoTemp2;
                    nodoTemp.Derecho = nodoTemp1;
+                   nodoTemp.EsPadre = true;
                    pila.Push(nodoTemp);                    
 
                 }
@@ -51,6 +52,7 @@ namespace LibreriaDeClases
                     nodoTemp.Simbolo = ListaSimbolos[i];
                     Nodo nodoTemp1 = pila.Pop();
                     nodoTemp.Izquierdo = nodoTemp1;
+                    nodoTemp.EsPadre = true;
                     pila.Push(nodoTemp);
                 }
             }
@@ -224,5 +226,156 @@ namespace LibreriaDeClases
         {
             return ListaSimbolos;
         }
+
+        public void EnumerarHojas(Nodo raiz)
+        {
+            if (raiz != null)
+            {
+                EnumerarHojas(raiz.Izquierdo);
+                EnumerarHojas(raiz.Derecho);
+                if (!raiz.EsPadre)
+                {
+                    raiz.Num = ++NumeroNodo;
+                    raiz.Last.Add(NumeroNodo);
+                    raiz.First.Add(NumeroNodo);
+                }
+            }
+        }
+
+        public void AgregarNullable(Nodo raiz)
+        {
+            if (raiz == null)
+            {
+                return;//Fin del algoritmo
+            }
+            AgregarNullable(raiz.Izquierdo);
+            AgregarNullable(raiz.Derecho);
+            if (raiz.Simbolo.Simbolo == "*")
+            {
+                raiz.Nullable = true;
+
+            }
+            else if (raiz.Simbolo.Simbolo == "|")
+            {
+               if (raiz.Izquierdo.Nullable == true || raiz.Derecho.Nullable == true)
+               {
+                   raiz.Nullable = true;
+               }
+            }
+            else if (raiz.Simbolo.Simbolo == ".")
+            {
+                if (raiz.Izquierdo.Nullable == true && raiz.Derecho.Nullable == true)
+                {
+                    raiz.Nullable = true;
+                }
+            }
+        }
+
+        public void AgregarFirst(Nodo raiz)
+        {
+            if (raiz == null)
+            {
+                return;
+            }
+
+            AgregarFirst(raiz.Izquierdo);
+            AgregarFirst(raiz.Derecho);
+
+            if (raiz.Simbolo.Simbolo == ".")
+            {
+                if (raiz.Izquierdo.Nullable == true)
+                {
+                    if (!(raiz.Izquierdo.Simbolo.esOperador) && !(raiz.Derecho.Simbolo.esOperador))
+                    {
+                        raiz.First.AddRange(raiz.Izquierdo.First);
+                        raiz.First.AddRange(raiz.Derecho.First);
+                    }
+                    else
+                    {
+                        raiz.First.AddRange(raiz.Izquierdo.First);
+                        raiz.First.AddRange(raiz.Derecho.First);
+                    }
+                }
+                else
+                {
+                    raiz.First.AddRange(raiz.Izquierdo.First);
+                }
+            }
+            else if (raiz.Simbolo.Simbolo == "*")
+            {
+                raiz.First.AddRange(raiz.Izquierdo.First);
+            }
+            else if (raiz.Simbolo.Simbolo == "|")
+            {
+               if (!(raiz.Izquierdo.Simbolo.esOperador) && !(raiz.Derecho.Simbolo.esOperador))
+               {
+                   raiz.First.AddRange(raiz.Izquierdo.First);
+                   raiz.First.AddRange(raiz.Derecho.First);
+               }
+               else
+               {
+                   raiz.First.AddRange(raiz.Izquierdo.First);
+                   raiz.First.AddRange(raiz.Derecho.First);
+               }
+            }
+        }
+
+        public void AgregarLast(Nodo raiz)
+        {
+            if (raiz == null)
+            {
+                return;
+            }
+
+            AgregarLast(raiz.Izquierdo);
+            AgregarLast(raiz.Derecho);
+
+            if (raiz.Simbolo.Simbolo == ".")
+            {
+                if (raiz.Derecho.Nullable == true)
+                {
+                    if (!(raiz.Izquierdo.Simbolo.esOperador) && !(raiz.Derecho.Simbolo.esOperador))
+                    {
+                        raiz.Last.AddRange(raiz.Izquierdo.Last);
+                        raiz.Last.AddRange(raiz.Derecho.Last);
+                    }
+                    else
+                    {
+                        raiz.Last.AddRange(raiz.Izquierdo.Last);
+                        raiz.Last.AddRange(raiz.Derecho.Last);
+                    }
+                }
+                else
+                {
+                    raiz.Last.AddRange(raiz.Derecho.Last);
+                }
+            }
+            else if (raiz.Simbolo.Simbolo == "*")
+            {
+                raiz.Last.AddRange(raiz.Izquierdo.Last);
+            }
+            else if (raiz.Simbolo.Simbolo == "|")
+            {
+                try
+                {
+                    if (!(raiz.Izquierdo.Simbolo.esOperador) && !(raiz.Derecho.Simbolo.esOperador))
+                    {
+                        raiz.Last.AddRange(raiz.Izquierdo.Last);
+                        raiz.Last.AddRange(raiz.Derecho.Last);
+                    }
+                    else
+                    {
+                        raiz.Last.AddRange(raiz.Izquierdo.Last);
+                        raiz.Last.AddRange(raiz.Derecho.Last);
+                    }
+                }
+                catch
+                {
+
+                }
+
+            }
+        }
+
     }
 }

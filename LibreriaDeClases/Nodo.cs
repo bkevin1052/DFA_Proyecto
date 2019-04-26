@@ -12,6 +12,20 @@ namespace LibreriaDeClases
             First = new List<int>();
             Last = new List<int>();
             Nullable = false;
+            EsPadre = false;
+            Num = 0;
+        }
+
+        public bool EsPadre
+        {
+            get;
+            set;
+        }
+
+        public int Num
+        {
+            get;
+            set;
         }
 
         public Nodo Izquierdo
