@@ -4,7 +4,7 @@ using System.Text;
 
 namespace LibreriaDeClases
 {
-    public class Nodo
+    public class Nodo 
     {
 
         public Nodo()

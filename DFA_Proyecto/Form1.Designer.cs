@@ -30,8 +30,8 @@
         {
             this.txtRuta = new System.Windows.Forms.TextBox();
             this.btnCargarArchivo = new System.Windows.Forms.Button();
-            this.dataGridView1 = new System.Windows.Forms.DataGridView();
-            ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
+            this.automataGrid = new System.Windows.Forms.DataGridView();
+            ((System.ComponentModel.ISupportInitialize)(this.automataGrid)).BeginInit();
             this.SuspendLayout();
             // 
             // txtRuta
@@ -51,27 +51,27 @@
             this.btnCargarArchivo.UseVisualStyleBackColor = true;
             this.btnCargarArchivo.Click += new System.EventHandler(this.btnCargarArchivo_Click);
             // 
-            // dataGridView1
+            // automataGrid
             // 
-            this.dataGridView1.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dataGridView1.Location = new System.Drawing.Point(13, 121);
-            this.dataGridView1.Name = "dataGridView1";
-            this.dataGridView1.RowTemplate.Height = 24;
-            this.dataGridView1.Size = new System.Drawing.Size(775, 317);
-            this.dataGridView1.TabIndex = 2;
+            this.automataGrid.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.automataGrid.Location = new System.Drawing.Point(13, 121);
+            this.automataGrid.Name = "automataGrid";
+            this.automataGrid.RowTemplate.Height = 24;
+            this.automataGrid.Size = new System.Drawing.Size(775, 317);
+            this.automataGrid.TabIndex = 2;
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 450);
-            this.Controls.Add(this.dataGridView1);
+            this.Controls.Add(this.automataGrid);
             this.Controls.Add(this.btnCargarArchivo);
             this.Controls.Add(this.txtRuta);
             this.Name = "Form1";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "DFA";
-            ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.automataGrid)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -81,7 +81,7 @@
 
         private System.Windows.Forms.TextBox txtRuta;
         private System.Windows.Forms.Button btnCargarArchivo;
-        private System.Windows.Forms.DataGridView dataGridView1;
+        private System.Windows.Forms.DataGridView automataGrid;
     }
 }
 

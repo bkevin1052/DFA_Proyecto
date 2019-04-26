@@ -1,15 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using LibreriaDeClases;
+using System.IO;
 
 namespace DFA_Proyecto
 {
@@ -47,15 +43,19 @@ namespace DFA_Proyecto
 
         //AUTOMATA
         Automata automata;
+        private Dictionary<int, List<int>> Follow;
+        private List<Estado> DEstados;
+
+        //ESCRITURA
+        string escritura;
+        StreamWriter escribir;
+
+        List<Symbol> simbolos;
 
         public Form1()
         {
             InitializeComponent();
             open = new OpenFileDialog();
-            sets = new Dictionary<string,Set>();
-            pilaTokens = new Stack<Token>();
-            actions = new Dictionary<int, LibreriaDeClases.Action>();
-            error = new Dictionary<string, Error>();
         }
 
         private void btnCargarArchivo_Click(object sender, EventArgs e)
@@ -66,9 +66,14 @@ namespace DFA_Proyecto
             {
                 txtRuta.Text = open.FileName;
                 lecturaArchivo = new StreamReader(open.FileName);
-
+                sets = new Dictionary<string, Set>();
+                pilaTokens = new Stack<Token>();
+                actions = new Dictionary<int, LibreriaDeClases.Action>();
+                error = new Dictionary<string, Error>();
+                DEstados = new List<Estado>();
                 //Inicio de lectura
                 LecturaSets();
+                AgregarAutomata();
             }
         }
 
@@ -442,6 +447,41 @@ namespace DFA_Proyecto
             }
         }
 
+
+        private void AgregarAutomata()
+        {
+            Nodo raiz = new Nodo();
+            raiz = automata.Raiz();
+            simbolos = new List<Symbol>();
+            RecorrerArbol(raiz);
+            List<string> ListaSinDuplicados = simbolos.Select(x => x.Simbolo.TrimEnd().TrimStart()).Distinct().ToList();
+            int contador = 0;
+            foreach(string x in ListaSinDuplicados)
+            {
+                if(x == "#")
+                {
+                    continue;
+                }
+                automataGrid.Columns.Add(contador .ToString(), x);
+                contador++;
+            }                 
+        }
+
+        private void RecorrerArbol(Nodo raiz)
+        {
+            if (raiz == null)
+            {
+                return;
+            }
+
+            RecorrerArbol(raiz.Izquierdo);
+            RecorrerArbol(raiz.Derecho);
+            if(raiz.Derecho == null && raiz.Izquierdo == null)
+            {
+                simbolos.Add(raiz.Simbolo);
+            }
+        }
+
         /// <summary>
         /// Metodo para generar un automata
         /// </summary>
@@ -458,6 +498,244 @@ namespace DFA_Proyecto
             raiz = automata.Raiz();
             automata.AgregarLast(raiz);
             raiz = automata.Raiz();
+            Follow = new Dictionary<int, List<int>>();
+            for (int i = 1; i <= automata.NumeroNodos(); i++)
+            {
+                Follow.Add(i, new List<int>());
+            }
+            AgregarFollow(raiz);
+            ArchivoFollows();
+
+            if (!File.Exists(@"C:\Users\kevin\Desktop\follows.txt"))
+            {
+                escribir = new StreamWriter(@"C:\Users\kevin\Desktop\follows.txt");
+                escribir.Write(escritura);
+                escribir.Close();
+                MessageBox.Show(@"El Archivo follows.txt se creo correctamente C:\Users\kevin\Desktop\follows.txt", "Informacion", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            else
+            {
+                File.Delete(@"C:\Users\kevin\Desktop\follows.txt");
+                //File.Create(@"C:\Users\kevin\Desktop\follows.txt");
+                escribir = new StreamWriter(@"C:\Users\kevin\Desktop\follows.txt");
+                escribir.Write(escritura);
+                escribir.Close();
+                MessageBox.Show(@"El Archivo follows.txt se creo correctamente C:\Users\kevin\Desktop\follows.txt", "Informacion", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+
+            escritura = "";
+
+            if (!File.Exists(@"C:\Users\kevin\Desktop\arbol.txt"))
+            {
+                escribir = new StreamWriter(@"C:\Users\kevin\Desktop\arbol.txt");
+                ArchivoArbol(raiz);
+                escribir.Write(escritura);
+                escribir.Close();
+                MessageBox.Show(@"El Archivo arbol.txt se creo correctamente C:\Users\kevin\Desktop\arbol.txt", "Informacion",MessageBoxButtons.OK,MessageBoxIcon.Information);
+            }
+            else
+            {
+                File.Delete(@"C:\Users\kevin\Desktop\arbol.txt");
+                //File.Create(@"C:\Users\kevin\Desktop\follows.txt");
+                escribir = new StreamWriter(@"C:\Users\kevin\Desktop\arbol.txt");
+                ArchivoArbol(raiz);
+                escribir.Write(escritura);
+                escribir.Close();
+                MessageBox.Show(@"El Archivo arbol.txt se creo correctamente C:\Users\kevin\Desktop\arbol.txt", "Informacion", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+
+            escritura = "";
+
+            ArchivoSets();
+
+            escritura = "";
+
+            ArchivoActions();
+
+            escritura = "";
+
+            ArchivoError();
+        }
+
+        private void AgregarFollow(Nodo raiz)
+        {            
+            if(raiz == null)
+            {
+                return;
+            }
+
+            AgregarFollow(raiz.Izquierdo);
+            AgregarFollow(raiz.Derecho);
+
+            if (raiz.Simbolo.Simbolo == ".")
+            {
+                int[] lastpos_c1 = raiz.Izquierdo.Last.ToArray();
+                List<int> firstpos_c2 = raiz.Derecho.First;
+                for (int i = 0; i < lastpos_c1.Length; i++)
+                {
+                    Follow[lastpos_c1[i]].AddRange(firstpos_c2);
+                }
+            }
+            else if (raiz.Simbolo.Simbolo == "*")
+            {
+                int[] lastpos_n = raiz.Last.ToArray();
+                List<int> firstpos_n = raiz.First;
+                for (int i = 0; i < lastpos_n.Length; i++)
+                {
+                    Follow[lastpos_n[i]].AddRange(firstpos_n);
+                }
+            }
+        }
+
+        private void ArchivoFollows()
+        {
+            escritura = "";            
+
+            for (int i = 1; i <= Follow.Keys.Count; i++)
+            {
+                escritura += Environment.NewLine;
+                escritura += "NODO: " + i;
+                escritura += Environment.NewLine;
+                escritura +=  "FOLLOW: ";
+                escritura += Environment.NewLine;
+
+                for (int j = 0; j < Follow[i].Count; j++)
+                {
+                    escritura += Follow[i][j] + ", ";
+                }
+                escritura += Environment.NewLine;
+            }
+        }
+
+        private void ArchivoArbol(Nodo raiz)
+        {
+            if(raiz == null)
+            {
+                return;
+            }
+
+            ArchivoArbol(raiz.Izquierdo);
+            ArchivoArbol(raiz.Derecho);
+
+            escritura += Environment.NewLine;
+            escritura += "NODO: " + raiz.Simbolo.Simbolo;
+            escritura += Environment.NewLine;
+            escritura += "FIRST: ";
+            escritura += Environment.NewLine;
+
+            for (int i = 0; i < raiz.First.Count; i++)
+            {
+                escritura += raiz.First[i] + ", ";
+            }
+            escritura += Environment.NewLine;
+            escritura += "LAST: ";
+            escritura += Environment.NewLine;
+            for (int i = 0; i < raiz.Last.Count; i++)
+            {
+                escritura += raiz.Last[i] + ", ";
+            }
+            escritura += Environment.NewLine;
+            escritura += "NULABILIDAD: ";
+            escritura += Environment.NewLine;
+            escritura += raiz.Nullable.ToString();
+            escritura += Environment.NewLine;
+
+        }
+
+        private void ArchivoSets()
+        {
+            foreach (var set in sets)
+            {
+                string nombre = set.Key;
+                Set Lista = set.Value;
+                escritura += Environment.NewLine;
+                escritura += nombre + " = " ;
+
+                for (int i = 0; i < Lista.set.Count; i++)
+                {
+                    escritura += Lista.set[i];
+                }
+
+                escritura += Environment.NewLine;
+            }
+
+            if (!File.Exists(@"C:\Users\kevin\Desktop\sets.txt"))
+            {
+                escribir = new StreamWriter(@"C:\Users\kevin\Desktop\sets.txt");                
+                escribir.Write(escritura);
+                escribir.Close();
+                MessageBox.Show(@"El Archivo sets.txt se creo correctamente  C:\Users\kevin\Desktop\sets.txt", "Informacion", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            else
+            {
+                File.Delete(@"C:\Users\kevin\Desktop\sets.txt");
+                //File.Create(@"C:\Users\kevin\Desktop\follows.txt");
+                escribir = new StreamWriter(@"C:\Users\kevin\Desktop\sets.txt");
+                escribir.Write(escritura);
+                escribir.Close();
+                MessageBox.Show(@"El Archivo sets.txt se creo correctamente  C:\Users\kevin\Desktop\sets.txt", "Informacion", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+        }
+
+        private void ArchivoActions()
+        {
+            foreach (var ac in actions)
+            {
+                int nombre = ac.Key;
+                LibreriaDeClases.Action Lista = ac.Value;
+                escritura += Environment.NewLine;
+                escritura += nombre + " = ";
+                escritura += Lista.Valor;
+                escritura += Environment.NewLine;
+            }
+
+            if (!File.Exists(@"C:\Users\kevin\Desktop\actions.txt"))
+            {
+                escribir = new StreamWriter(@"C:\Users\kevin\Desktop\actions.txt");
+                escribir.Write(escritura);
+                escribir.Close();
+                MessageBox.Show(@"El Archivo actions.txt se creo correctamente  C:\Users\kevin\Desktop\actions.txt", "Informacion", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            else
+            {
+                File.Delete(@"C:\Users\kevin\Desktop\actions.txt");
+                //File.Create(@"C:\Users\kevin\Desktop\follows.txt");
+                escribir = new StreamWriter(@"C:\Users\kevin\Desktop\actions.txt");
+                escribir.Write(escritura);
+                escribir.Close();
+                MessageBox.Show(@"El Archivo actions.txt se creo correctamente C:\Users\kevin\Desktop\actions.txt", "Informacion", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+        }
+
+        private void ArchivoError()
+        {
+            foreach (var error in error)
+            {
+                string e = error.Key;
+                Error er = error.Value;
+
+                escritura += Environment.NewLine;
+                escritura += e + " = " + er.Valor;
+                escritura += Environment.NewLine;
+            }
+
+
+            if (!File.Exists(@"C:\Users\kevin\Desktop\error.txt"))
+            {
+                escribir = new StreamWriter(@"C:\Users\kevin\Desktop\error.txt");
+                escribir.Write(escritura);
+                escribir.Close();
+                MessageBox.Show(@"El Archivo error.txt se creo correctamente  C:\Users\kevin\Desktop\error.txt", "Informacion", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            else
+            {
+                File.Delete(@"C:\Users\kevin\Desktop\error.txt");
+                //File.Create(@"C:\Users\kevin\Desktop\follows.txt");
+                escribir = new StreamWriter(@"C:\Users\kevin\Desktop\error.txt");
+                escribir.Write(escritura);
+                escribir.Close();
+                MessageBox.Show(@"El Archivo error.txt se creo correctamente  C:\Users\kevin\Desktop\error.txt", "Informacion", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
         }
     }
 }

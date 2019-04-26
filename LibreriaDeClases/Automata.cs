@@ -301,7 +301,7 @@ namespace LibreriaDeClases
                     raiz.First.AddRange(raiz.Izquierdo.First);
                 }
             }
-            else if (raiz.Simbolo.Simbolo == "*")
+            else if (raiz.Simbolo.Simbolo == "*" && raiz.Simbolo.esOperador)
             {
                 raiz.First.AddRange(raiz.Izquierdo.First);
             }
@@ -350,7 +350,7 @@ namespace LibreriaDeClases
                     raiz.Last.AddRange(raiz.Derecho.Last);
                 }
             }
-            else if (raiz.Simbolo.Simbolo == "*")
+            else if (raiz.Simbolo.Simbolo == "*" && raiz.Simbolo.esOperador)
             {
                 raiz.Last.AddRange(raiz.Izquierdo.Last);
             }
@@ -375,6 +375,11 @@ namespace LibreriaDeClases
                 }
 
             }
+        }
+
+        public int NumeroNodos()
+        {
+            return NumeroNodo;
         }
 
     }

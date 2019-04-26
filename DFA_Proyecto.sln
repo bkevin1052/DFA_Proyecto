@@ -5,7 +5,7 @@ VisualStudioVersion = 15.0.28307.421
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DFA_Proyecto", "DFA_Proyecto\DFA_Proyecto.csproj", "{0F5855E7-5151-471F-B0E1-81D54456BC05}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibreriaDeClases", "LibreriaDeClases\LibreriaDeClases.csproj", "{BB3349D0-5740-4183-88C1-8DF4FA3AA4EE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LibreriaDeClases", "LibreriaDeClases\LibreriaDeClases.csproj", "{BB3349D0-5740-4183-88C1-8DF4FA3AA4EE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
