@@ -84,7 +84,7 @@ namespace DFA_Proyecto
             try
             {
                 int x, y;
-                while ((linea = lecturaArchivo.ReadLine()) != null)
+                while ((linea = lecturaArchivo.ReadLine()) != null && linea != "")
                 {
                     linea = linea.TrimEnd().TrimStart();
                     if (linea.ToUpper() == "TOKENS")
@@ -260,7 +260,7 @@ namespace DFA_Proyecto
             {                
                 char[] charLinea;
                 linea = lecturaArchivo.ReadLine();
-                while (linea != null && linea.ToUpper() != "ACTIONS")
+                while (linea != null && linea.ToUpper() != "ACTIONS" && linea != "")
                 {
                     linea = linea.TrimEnd().TrimStart();
                     if (linea.ToUpper() == "ACTIONS")
@@ -388,7 +388,7 @@ namespace DFA_Proyecto
         {
             try
             {
-                while ((linea = lecturaArchivo.ReadLine()) != null && !linea.ToUpper().Contains("ERROR"))
+                while ((linea = lecturaArchivo.ReadLine()) != null && !linea.ToUpper().Contains("ERROR") && linea != "")
                 {
                     linea = linea.TrimEnd().TrimStart();
                     if (linea.ToUpper().Contains("ERROR"))
@@ -475,45 +475,7 @@ namespace DFA_Proyecto
                 q0.EsAceptable = true;
             }
             estados.Clear();
-            estados.Add(q0);
-
-            while (true)
-            {
-                bool exit = true;
-                Estado s = null;
-
-                foreach (Estado estado in estados)
-                {
-                    if (!estado.EsMarcado)
-                    {
-                        exit = false;
-                        s = estado;
-                    }
-                    if (exit)
-                    {
-                        break;
-                    }
-
-                    if (s.EsMarcado)
-                    {
-                        continue;
-                    }
-                    s.EsMarcado = true;
-                    List<int> nombre = s.nombre;
-                    foreach (string a in ListaSinDuplicados)
-                    {
-                        List<int> u = new List<int>();
-                        foreach (int p in nombre)
-                        {
-                            if ()
-                            {
-
-                            }
-                        }
-                    }
-                }
-            }
-
+            estados.Add(q0);         
         }
 
         private void RecorrerArbol(Nodo raiz)
