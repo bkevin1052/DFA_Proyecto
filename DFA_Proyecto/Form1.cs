@@ -2,10 +2,8 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Windows.Forms;
 using LibreriaDeClases;
-using System.IO;
 using System.Data;
 
 namespace DFA_Proyecto
@@ -46,6 +44,8 @@ namespace DFA_Proyecto
         Automata automata;
         private Dictionary<int, List<int>> Follow;
         private int IDEstado = 0;
+        List<Estado> estados;
+        List<string> ListaSinDuplicados;
 
         //ESCRITURA
         string escritura;
@@ -453,7 +453,7 @@ namespace DFA_Proyecto
             raiz = automata.Raiz();
             simbolos = new List<Symbol>();
             RecorrerArbol(raiz);
-            List<string> ListaSinDuplicados = simbolos.Select(x => x.Simbolo.TrimEnd().TrimStart()).Distinct().ToList();
+            ListaSinDuplicados = simbolos.Select(x => x.Simbolo.TrimEnd().TrimStart()).Distinct().ToList();
             int contador = 0;
             foreach(string x in ListaSinDuplicados)
             {
@@ -465,12 +465,54 @@ namespace DFA_Proyecto
                 contador++;
             }
 
-
+            estados = new List<Estado>();
             Estado q0 = new Estado(IDEstado);
             q0.nombre = raiz.First;
             q0.ID = automataGrid.Rows.Add();
-
             //inicio de automata
+            if (q0.nombre.Contains(Follow.Count))
+            {
+                q0.EsAceptable = true;
+            }
+            estados.Clear();
+            estados.Add(q0);
+
+            while (true)
+            {
+                bool exit = true;
+                Estado s = null;
+
+                foreach (Estado estado in estados)
+                {
+                    if (!estado.EsMarcado)
+                    {
+                        exit = false;
+                        s = estado;
+                    }
+                    if (exit)
+                    {
+                        break;
+                    }
+
+                    if (s.EsMarcado)
+                    {
+                        continue;
+                    }
+                    s.EsMarcado = true;
+                    List<int> nombre = s.nombre;
+                    foreach (string a in ListaSinDuplicados)
+                    {
+                        List<int> u = new List<int>();
+                        foreach (int p in nombre)
+                        {
+                            if ()
+                            {
+
+                            }
+                        }
+                    }
+                }
+            }
 
         }
 
