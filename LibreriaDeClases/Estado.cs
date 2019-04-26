@@ -9,6 +9,7 @@ namespace LibreriaDeClases
         public Estado(int ID)
         {
             this.ID = ID;
+            nombre = new List<int>();
         }
 
         public int ID

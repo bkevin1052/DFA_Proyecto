@@ -6,6 +6,7 @@ using System.Text;
 using System.Windows.Forms;
 using LibreriaDeClases;
 using System.IO;
+using System.Data;
 
 namespace DFA_Proyecto
 {
@@ -44,12 +45,11 @@ namespace DFA_Proyecto
         //AUTOMATA
         Automata automata;
         private Dictionary<int, List<int>> Follow;
-        private List<Estado> DEstados;
+        private int IDEstado = 0;
 
         //ESCRITURA
         string escritura;
         StreamWriter escribir;
-
         List<Symbol> simbolos;
 
         public Form1()
@@ -70,7 +70,6 @@ namespace DFA_Proyecto
                 pilaTokens = new Stack<Token>();
                 actions = new Dictionary<int, LibreriaDeClases.Action>();
                 error = new Dictionary<string, Error>();
-                DEstados = new List<Estado>();
                 //Inicio de lectura
                 LecturaSets();
                 AgregarAutomata();
@@ -462,9 +461,17 @@ namespace DFA_Proyecto
                 {
                     continue;
                 }
-                automataGrid.Columns.Add(contador .ToString(), x);
+                automataGrid.Columns.Add(contador.ToString(), x);
                 contador++;
-            }                 
+            }
+
+
+            Estado q0 = new Estado(IDEstado);
+            q0.nombre = raiz.First;
+            q0.ID = automataGrid.Rows.Add();
+
+            //inicio de automata
+
         }
 
         private void RecorrerArbol(Nodo raiz)
